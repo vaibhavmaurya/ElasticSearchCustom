@@ -1,0 +1,40 @@
+version: '2.2'
+services:
+  elasticsearch:
+    image: docker.io/rishi12286/elasticsearch_custom
+    container_name: elasticsearch
+    ports:
+        - 9200:9200
+        - 9300:9300
+    environment:
+      - discovery.type=single-node
+    networks:
+      - esnet
+  kibana:
+    depends_on:
+      - elasticsearch
+    image: vm/kibana_custom:latest
+    container_name: kibana
+    ports:
+      - 5601:5601
+    networks:
+      - esnet
+  enterprise-search:
+    depends_on:
+      - elasticsearch
+    image: docker.elastic.co/enterprise-search/enterprise-search:7.9.2
+    container_name: enterprise_search
+    ports:
+        - 3002:3002
+    environment:
+      # - elasticsearch.host=http://elastic:hello123@elasticsearch:9200
+      - elasticsearch.host=http://elasticsearch:9200
+      - elasticsearch.username=elastic
+      - elasticsearch.password=hello123
+      - allow_es_settings_modification=true
+      - ent_search.auth.source=standard
+      - secret_management.encryption_keys=['w!z%C*F-JaNdRgUkXp2r5u8x/A?D(G+KbPeShVmYq3t6v9y$B&E)H@McQfTjWnZr']
+    networks:
+      - esnet
+networks:
+  esnet:
